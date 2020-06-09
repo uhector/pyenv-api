@@ -1,4 +1,6 @@
-from .commands import (
+from subprocess import run
+
+from commands import (
     FORCE,
     GLOBAL,
     INSTALL,
@@ -17,4 +19,15 @@ class PyenvAPI(object):
     with pyenv through subprocess module.
     """
 
-    pass
+    def __new__(cls):
+        """Check if pyenv is installed.
+        
+        If it's installed, returns a `PyenvAPI` object.
+        """
+
+        check_pyenv = run([PYENV, ROOT], capture_output=True)
+
+        if check_pyenv.returncode == 0:
+            return super().__new__(cls)
+        else:
+            return None
