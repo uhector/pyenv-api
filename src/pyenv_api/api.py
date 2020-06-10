@@ -1,7 +1,7 @@
 import os
 from subprocess import run
 
-from commands import (
+from .commands import (
     FORCE,
     GLOBAL,
     INSTALL,
