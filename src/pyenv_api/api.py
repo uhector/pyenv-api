@@ -65,6 +65,36 @@ class PyenvAPI(object):
         
         return stdout.split()[2:]
 
+    @property
+    def global_version(self) -> list:
+        """Returns a list of the currently active Python versions
+        
+        They are return in order of priority."""
+
+        ps = run([PYENV, GLOBAL], capture_output=True, text=True)
+
+        stdout = ps.stdout
+        
+        return stdout.split()
+
+    @global_version.setter
+    def global_version(self, versions):
+        assert isinstance(versions, (tuple, list))
+
+        for version in versions:
+            if version not in self.installed_versions:
+                raise Exception(f"pyenv: version `{version}' not installed")
+
+        command = [PYENV, GLOBAL] + list(versions)
+
+        ps = run(command, capture_output=True, text=True)
+
+    @global_version.deleter
+    def global_version(self):
+        """Overwrites 'version' pyenv file"""
+        with open(os.path.join(self._root_dir, 'version'), 'w') as file:
+            file.write('')
+
     @classmethod
     def _get_root_dir(cls) -> str:
         """Return the pyenv root directory"""
