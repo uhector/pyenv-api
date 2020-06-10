@@ -55,6 +55,16 @@ class PyenvAPI(object):
 
         return versions
 
+    @property
+    def available_verions(self) -> list:
+        """Returns a list of all available Python versions to install"""
+
+        ps = run([PYENV, INSTALL, LIST], capture_output=True, text=True)
+
+        stdout = ps.stdout
+        
+        return stdout.split()[2:]
+
     @classmethod
     def _get_root_dir(cls) -> str:
         """Return the pyenv root directory"""
