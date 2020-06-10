@@ -40,6 +40,21 @@ class PyenvAPI(object):
         #: Directory path where all Python versions are installed.
         self._versions_dir = os.path.join(self._root_dir, 'versions')
 
+    @property
+    def installed_versions(self) -> list:
+        """Returns a list of all installed versions"""
+        
+        versions = []
+        
+        for directory in os.listdir(self._versions_dir):
+            
+            full_path = os.path.join(self._versions_dir, directory)
+            
+            if not os.path.islink(full_path):
+                versions.append(directory)
+
+        return versions
+
     @classmethod
     def _get_root_dir(cls) -> str:
         """Return the pyenv root directory"""
