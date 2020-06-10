@@ -1,3 +1,4 @@
+import os
 from subprocess import run
 
 from commands import (
@@ -32,6 +33,13 @@ class PyenvAPI(object):
         else:
             return None
 
+    def __init__(self):
+        #: Pyenv root directory path.
+        self._root_dir = PyenvAPI._get_root_dir()
+
+        #: Directory path where all Python versions are installed.
+        self._versions_dir = os.path.join(self._root_dir, 'versions')
+
     @classmethod
     def _get_root_dir(cls) -> str:
         """Return the pyenv root directory"""
@@ -40,4 +48,4 @@ class PyenvAPI(object):
 
         stdout = ps.stdout
 
-        return stdout.strip() 
+        return stdout.strip()
