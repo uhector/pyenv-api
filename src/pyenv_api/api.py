@@ -31,3 +31,13 @@ class PyenvAPI(object):
             return super().__new__(cls)
         else:
             return None
+
+    @classmethod
+    def _get_root_dir(cls) -> str:
+        """Return the pyenv root directory"""
+
+        ps = run([PYENV, ROOT], capture_output=True, text=True)
+
+        stdout = ps.stdout
+
+        return stdout.strip() 
