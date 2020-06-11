@@ -1,5 +1,5 @@
 import os
-from subprocess import run
+from subprocess import run, Popen, PIPE
 
 from .commands import (
     FORCE,
@@ -94,6 +94,23 @@ class PyenvAPI(object):
         """Overwrites 'version' pyenv file"""
         with open(os.path.join(self._root_dir, 'version'), 'w') as file:
             file.write('')
+
+    def install(self, version, **kwargs) -> object:
+        command = [PYENV, INSTALL, version]
+
+        if kwargs.get('verbose', None):
+            command += [VERBOSE]
+
+        if version in self.installed_versions:
+            if kwargs.get('force', None):
+                command += [FORCE]
+            else:
+                raise Exception(f"pyenv: {self._versions_dir}/{version} already exists")
+        else:
+            if version not in self.available_verions:
+                raise Exception(f"python-build: definition not found: {version}")
+
+        return Popen(command, stdout=PIPE, stderr=PIPE)
 
     @classmethod
     def _get_root_dir(cls) -> str:
