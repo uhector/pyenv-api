@@ -62,7 +62,7 @@ class PyenvAPI(object):
         return versions
 
     @property
-    def available_verions(self) -> list:
+    def available_versions(self) -> list:
         """Return a list of all available Python versions to install."""
 
         args = [PYENV, INSTALL, LIST]
@@ -76,33 +76,45 @@ class PyenvAPI(object):
 
     @property
     def global_version(self) -> list:
-        """Returns a list of the currently active Python versions
+        """Return a list of the currently active Python versions.
         
-        They are return in order of priority."""
+        They are return in order of priority.
+        
+        If there is only one Python version set as global version,
+        the returned list will contain a single element.
+        """
 
-        ps = run([PYENV, GLOBAL], capture_output=True, text=True)
+        args = [PYENV, GLOBAL]
 
-        stdout = ps.stdout
+        ps = Popen(args, stdout=PIPE, stderr=PIPE)
+
+        stdout = ps.communicate()[0].decode()
         
         return stdout.split()
 
     @global_version.setter
     def global_version(self, versions):
+        """Set a list of Python versions as global.
+
+        :param versions: a tuple or list of one or multiple Python versions.
+        """
+
         assert isinstance(versions, (tuple, list))
 
         for version in versions:
             if version not in self.installed_versions:
                 raise Exception(f"pyenv: version `{version}' not installed")
 
-        command = [PYENV, GLOBAL] + list(versions)
-
-        ps = run(command, capture_output=True, text=True)
+        args = [PYENV, GLOBAL] + list(versions)
+        
+        Popen(args, stdout=PIPE, stderr=PIPE)
 
     @global_version.deleter
     def global_version(self):
-        """Overwrites 'version' pyenv file"""
+        """Overwrites '.pyenv/version' file."""
+
         with open(os.path.join(self._root_dir, 'version'), 'w') as file:
-            file.write('')
+            pass # Nothing here...
 
     def install(self, version, **kwargs) -> object:
         command = [PYENV, INSTALL, version]
