@@ -146,8 +146,10 @@ class PyenvAPI(object):
     def uninstall(self, version):
         if version not in self.installed_versions:
             raise Exception(f"pyenv: version `{version}' not installed")
-        
-        ps = run([PYENV, UNINSTALL, FORCE, version], capture_output=True, text=True)
+
+        args = [PYENV, UNINSTALL, FORCE, version]
+
+        Popen(args, stdout=PIPE, stderr=PIPE)
 
     @classmethod
     def _get_root_dir(cls) -> str:
