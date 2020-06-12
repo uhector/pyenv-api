@@ -41,10 +41,21 @@ class PyenvAPI(object):
 
     def __init__(self):
         #: Pyenv root directory path.
-        self._root_dir = PyenvAPI._get_root_dir()
+        self._root_dir = self._get_root_dir()
 
         #: Directory path where all Python versions are installed.
         self._versions_dir = os.path.join(self._root_dir, 'versions')
+
+    def _get_root_dir(self) -> str:
+        """Return the pyenv root directory path."""
+
+        args = [PYENV, ROOT]
+
+        ps = Popen(args, stdout=PIPE, stderr=PIPE)
+        
+        stdout = ps.communicate()[0].decode()
+
+        return stdout.strip()
 
     @property
     def installed_versions(self) -> list:
@@ -150,13 +161,3 @@ class PyenvAPI(object):
         args = [PYENV, UNINSTALL, FORCE, version]
 
         Popen(args, stdout=PIPE, stderr=PIPE)
-
-    @classmethod
-    def _get_root_dir(cls) -> str:
-        """Return the pyenv root directory"""
-
-        ps = run([PYENV, ROOT], capture_output=True, text=True)
-
-        stdout = ps.stdout
-
-        return stdout.strip()
