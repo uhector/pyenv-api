@@ -16,7 +16,7 @@ from .commands import (
 )
 
 
-class PyenvAPI(object):
+class PyenvAPI:
     """The PyenvAPI class implements an interface that lets it interact
     with pyenv through subprocess module.
     """
