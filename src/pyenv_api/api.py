@@ -63,12 +63,15 @@ class PyenvAPI(object):
 
     @property
     def available_verions(self) -> list:
-        """Returns a list of all available Python versions to install"""
+        """Return a list of all available Python versions to install."""
 
-        ps = run([PYENV, INSTALL, LIST], capture_output=True, text=True)
+        args = [PYENV, INSTALL, LIST]
 
-        stdout = ps.stdout
-        
+        ps = Popen(args, stdout=PIPE, stderr=PIPE)
+
+        stdout = ps.communicate()[0].decode()
+        # Positions 0 and 1 in stdout after apply split() are
+        # 'Available' and 'versions:' strings.
         return stdout.split()[2:]
 
     @property
