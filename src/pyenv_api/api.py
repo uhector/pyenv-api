@@ -22,7 +22,7 @@ class PyenvAPI(object):
     """
 
     def __new__(cls):
-        """Check if pyenv is installed."""
+        """Check if pyenv is installed before return an object."""
 
         args = [PYENV, ROOT]
 
