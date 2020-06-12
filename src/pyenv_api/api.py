@@ -116,22 +116,32 @@ class PyenvAPI(object):
         with open(os.path.join(self._root_dir, 'version'), 'w') as file:
             pass # Nothing here...
 
-    def install(self, version, **kwargs) -> object:
-        command = [PYENV, INSTALL, version]
+    def install(self, version, verbose=False, force=False) -> object:
+        """Start a Python version intallation in a new process.
 
-        if kwargs.get('verbose', None):
-            command += [VERBOSE]
+        return a subprocess.Popen object.
+        
+        :param versions: a string of a valid Python version.
+        :param verbose: print compilation status to stdout.
+        :param force: install even if the version appears to be
+                      installed already.
+        """
+        
+        args = [PYENV, INSTALL, version]
+
+        if verbose == True:
+            args += [VERBOSE]
 
         if version in self.installed_versions:
-            if kwargs.get('force', None):
-                command += [FORCE]
+            if force == True:
+                args += [FORCE]
             else:
                 raise Exception(f"pyenv: {self._versions_dir}/{version} already exists")
         else:
-            if version not in self.available_verions:
+            if version not in self.available_versions:
                 raise Exception(f"python-build: definition not found: {version}")
 
-        return Popen(command, stdout=PIPE, stderr=PIPE)
+        return Popen(args, stdout=PIPE, stderr=PIPE)
 
     def uninstall(self, version):
         if version not in self.installed_versions:
