@@ -1,5 +1,6 @@
 import os
 from subprocess import run, Popen, PIPE
+from subprocess import CalledProcessError # Exception
 
 from .commands import (
     FORCE,
@@ -21,17 +22,22 @@ class PyenvAPI(object):
     """
 
     def __new__(cls):
-        """Check if pyenv is installed.
-        
-        If it's installed, returns a `PyenvAPI` object.
-        """
+        """Check if pyenv is installed."""
 
-        check_pyenv = run([PYENV, ROOT], capture_output=True)
+        args = [PYENV, ROOT]
 
-        if check_pyenv.returncode == 0:
-            return super().__new__(cls)
-        else:
-            return None
+        try:
+            ps = Popen(args, stdout=PIPE, stderr=PIPE)
+
+            stdout, stderr = ps.communicate()
+            returncode = ps.returncode
+
+            if returncode == 0:
+                return super().__new__(cls)
+            else:
+                raise CalledProcessError(returncode, ' '.join(args), (stdout, stderr))
+        except FileNotFoundError:
+            raise Exception('pyenv not installed')
 
     def __init__(self):
         #: Pyenv root directory path.
