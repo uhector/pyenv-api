@@ -1,5 +1,5 @@
 import os
-from subprocess import run, Popen, PIPE
+from subprocess import Popen, PIPE
 from subprocess import CalledProcessError # Exception
 
 from .commands import (
