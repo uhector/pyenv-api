@@ -15,6 +15,12 @@ from .commands import (
     VERBOSE
 )
 
+from .exceptions import (
+    NotInstalledError,
+    PyenvError,
+    PythonBuildError
+)
+
 
 class PyenvAPI:
     """The PyenvAPI class implements an interface that lets it interact
@@ -32,12 +38,13 @@ class PyenvAPI:
             stdout, stderr = ps.communicate()
             returncode = ps.returncode
 
-            if returncode == 0:
-                return super().__new__(cls)
-            else:
+            if returncode != 0:
                 raise CalledProcessError(returncode, ' '.join(args), (stdout, stderr))
+
         except FileNotFoundError:
-            raise Exception('pyenv not installed')
+            raise NotInstalledError('pyenv not installed on your system') from None
+        else:
+            return super().__new__(cls)
 
     def __init__(self):
         #: Pyenv root directory path.
@@ -114,7 +121,7 @@ class PyenvAPI:
 
         for version in versions:
             if version not in self.installed_versions:
-                raise Exception(f"pyenv: version `{version}' not installed")
+                raise PyenvError(f"version `{version}' not installed")
 
         args = [PYENV, GLOBAL] + list(versions)
         
@@ -147,16 +154,16 @@ class PyenvAPI:
             if force == True:
                 args += [FORCE]
             else:
-                raise Exception(f"pyenv: {self._versions_dir}/{version} already exists")
+                raise PyenvError(f"`{self._versions_dir}/{version}' already exists")
         else:
             if version not in self.available_versions:
-                raise Exception(f"python-build: definition not found: {version}")
+                raise PythonBuildError(f"`{version}' is not a valid version")
 
         return Popen(args, stdout=PIPE, stderr=PIPE)
 
     def uninstall(self, version):
         if version not in self.installed_versions:
-            raise Exception(f"pyenv: version `{version}' not installed")
+            raise PyenvError(f"version `{version}' not installed")
 
         args = [PYENV, UNINSTALL, FORCE, version]
 
