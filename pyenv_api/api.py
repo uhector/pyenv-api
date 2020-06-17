@@ -2,19 +2,6 @@ import os
 from subprocess import Popen, PIPE
 from subprocess import CalledProcessError # Exception
 
-from .commands import (
-    FORCE,
-    GLOBAL,
-    INSTALL,
-    LIST,
-    PYENV,
-    ROOT,
-    UNINSTALL,
-    VERSION,
-    VERSIONS,
-    VERBOSE
-)
-
 from .exceptions import (
     NotInstalledError,
     PyenvError,
