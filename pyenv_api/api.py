@@ -87,9 +87,9 @@ class PyenvAPI:
         return ps
 
     def _get_root_dir(self) -> str:
-        """Return the pyenv root directory path."""
+        """Returns the pyenv root directory path."""
 
-        args = [PYENV, ROOT]
+        args = ['root']
 
         ps = self._execute(args)
         
@@ -99,7 +99,7 @@ class PyenvAPI:
 
     @property
     def installed_versions(self) -> list:
-        """Returns a list of all installed versions"""
+        """Returns a list of all installed versions."""
         
         versions = []
         
@@ -114,9 +114,9 @@ class PyenvAPI:
 
     @property
     def available_versions(self) -> list:
-        """Return a list of all available Python versions to install."""
+        """Returns a list of all available Python versions to install."""
 
-        args = [PYENV, INSTALL, LIST]
+        args = ['install', '--list']
 
         ps = self._execute(args)
 
@@ -127,7 +127,7 @@ class PyenvAPI:
 
     @property
     def global_version(self) -> list:
-        """Return a list of the currently active Python versions.
+        """Returns a list of the currently active Python versions.
         
         They are return in order of priority.
         
@@ -135,7 +135,7 @@ class PyenvAPI:
         the returned list will contain a single element.
         """
 
-        args = [PYENV, GLOBAL]
+        args = ['global']
 
         ps = self._execute(args)
 
@@ -145,7 +145,7 @@ class PyenvAPI:
 
     @global_version.setter
     def global_version(self, versions):
-        """Set a list of Python versions as global.
+        """Sets a list of Python versions as global.
 
         :param versions: a tuple or list of one or multiple Python versions.
         """
@@ -156,7 +156,8 @@ class PyenvAPI:
             if version not in self.installed_versions:
                 raise PyenvError(f"version `{version}' not installed")
 
-        args = [PYENV, GLOBAL] + list(versions)
+        args = ['global']
+        args.extend(versions)
         
         return self._execute(args)
 
@@ -178,14 +179,14 @@ class PyenvAPI:
                       installed already.
         """
         
-        args = [PYENV, INSTALL, version]
+        args = ['install', version]
 
         if verbose == True:
-            args += [VERBOSE]
+            args.append('--verbose')
 
         if version in self.installed_versions:
             if force == True:
-                args += [FORCE]
+                args.append('--force')
             else:
                 raise PyenvError(f"`{self._versions_dir}/{version}' already exists")
         else:
@@ -198,6 +199,6 @@ class PyenvAPI:
         if version not in self.installed_versions:
             raise PyenvError(f"version `{version}' not installed")
 
-        args = [PYENV, UNINSTALL, FORCE, version]
+        args = ['uninstall', '--force', version]
 
         return self._execute(args)
