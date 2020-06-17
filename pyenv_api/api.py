@@ -53,12 +53,24 @@ class PyenvAPI:
         #: Directory path where all Python versions are installed.
         self._versions_dir = os.path.join(self._root_dir, 'versions')
 
+    def _execute(self, args) -> object:
+        """Executes all subprocess calls.
+        
+        :param args: list of subcommands and options.
+        """
+
+        ps = Popen(args, stdout=PIPE, stderr=PIPE)
+        
+        ps.communicate()
+        
+        return ps
+
     def _get_root_dir(self) -> str:
         """Return the pyenv root directory path."""
 
         args = [PYENV, ROOT]
 
-        ps = Popen(args, stdout=PIPE, stderr=PIPE)
+        ps = self._execute(args)
         
         stdout = ps.communicate()[0].decode()
 
@@ -85,7 +97,7 @@ class PyenvAPI:
 
         args = [PYENV, INSTALL, LIST]
 
-        ps = Popen(args, stdout=PIPE, stderr=PIPE)
+        ps = self._execute(args)
 
         stdout = ps.communicate()[0].decode()
         # Positions 0 and 1 in stdout after apply split() are
@@ -104,7 +116,7 @@ class PyenvAPI:
 
         args = [PYENV, GLOBAL]
 
-        ps = Popen(args, stdout=PIPE, stderr=PIPE)
+        ps = self._execute(args)
 
         stdout = ps.communicate()[0].decode()
         
@@ -125,7 +137,7 @@ class PyenvAPI:
 
         args = [PYENV, GLOBAL] + list(versions)
         
-        Popen(args, stdout=PIPE, stderr=PIPE)
+        return self._execute(args)
 
     @global_version.deleter
     def global_version(self):
@@ -167,4 +179,4 @@ class PyenvAPI:
 
         args = [PYENV, UNINSTALL, FORCE, version]
 
-        Popen(args, stdout=PIPE, stderr=PIPE)
+        return self._execute(args)
