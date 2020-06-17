@@ -27,6 +27,19 @@ class PyenvAPI:
     with pyenv through subprocess module.
     """
 
+    commands = [
+        # Subcommands
+        'global',
+        'install',
+        'root',
+        'uninstall',
+        'versions',
+        # Options
+        '--force',
+        '--list',
+        '--verbose'
+    ]
+
     def __new__(cls):
         """Check if pyenv is installed before return an object."""
 
@@ -53,10 +66,11 @@ class PyenvAPI:
         #: Directory path where all Python versions are installed.
         self._versions_dir = os.path.join(self._root_dir, 'versions')
 
-    def _execute(self, args) -> object:
-        """Executes all subprocess calls.
+    def _execute(self, args):
+        """Executes a command, wait for it ends, and then, returns a
+        subprocess.Popen object.
         
-        :param args: list of subcommands and options.
+        :param args: list of commands/subcommands/options.
         """
 
         ps = Popen(args, stdout=PIPE, stderr=PIPE)
