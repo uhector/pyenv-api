@@ -53,8 +53,8 @@ class PyenvAPI:
         #: Directory path where all Python versions are installed.
         self._versions_dir = os.path.join(self._root_dir, 'versions')
 
-    def _execute(self, args) -> object:
-        """Executes all subprocess calls.
+    def _execute(self, args) -> tuple:
+        """Executes all synchronous subprocess calls.
         
         :param args: list of subcommands and options.
         """
@@ -67,21 +67,21 @@ class PyenvAPI:
                 raise PyenvError(f"Invalid command `{arg}'")
 
         args.insert(0, 'pyenv')
-
         ps = Popen(args, stdout=PIPE, stderr=PIPE)
         
-        ps.communicate()
-        
-        return ps
+        stdout, stderr = ps.communicate()
+        returncode = ps.returncode
+
+        return returncode, stdout, stderr
 
     def _get_root_dir(self) -> str:
         """Returns the pyenv root directory path."""
 
         args = ['root']
-
         ps = self._execute(args)
         
-        stdout = ps.communicate()[0].decode()
+        returncode, stdout, stderr = ps
+        stdout = stdout.decode()
 
         return stdout.strip()
 
@@ -105,10 +105,11 @@ class PyenvAPI:
         """Returns a list of all available Python versions to install."""
 
         args = ['install', '--list']
-
         ps = self._execute(args)
 
-        stdout = ps.communicate()[0].decode()
+        returncode, stdout, stderr = ps
+        stdout = stdout.decode()
+        
         # Positions 0 and 1 in stdout after apply split() are
         # 'Available' and 'versions:' strings.
         return stdout.split()[2:]
@@ -124,10 +125,10 @@ class PyenvAPI:
         """
 
         args = ['global']
-
         ps = self._execute(args)
 
-        stdout = ps.communicate()[0].decode()
+        returncode, stdout, stderr = ps
+        stdout = stdout.decode()
         
         return stdout.split()
 
@@ -146,7 +147,6 @@ class PyenvAPI:
 
         args = ['global']
         args.extend(versions)
-        
         self._execute(args)
 
     @global_version.deleter
