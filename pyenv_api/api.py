@@ -66,12 +66,19 @@ class PyenvAPI:
         #: Directory path where all Python versions are installed.
         self._versions_dir = os.path.join(self._root_dir, 'versions')
 
-    def _execute(self, args):
-        """Executes a command, wait for it ends, and then, returns a
-        subprocess.Popen object.
+    def _execute(self, args) -> object:
+        """Executes all subprocess calls.
         
-        :param args: list of commands/subcommands/options.
+        :param args: list of subcommands and options.
         """
+
+        assert isinstance(args, list) 
+
+        for arg in args:
+            if arg not in self.commands:
+                raise PyenvError(f"Invalid command `{arg}'")
+
+        args.insert(0, 'pyenv')
 
         ps = Popen(args, stdout=PIPE, stderr=PIPE)
         
