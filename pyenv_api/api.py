@@ -30,7 +30,7 @@ class PyenvAPI:
     def __new__(cls):
         """Check if pyenv is installed before return an object."""
 
-        args = [PYENV, ROOT]
+        args = ['pyenv', 'root']
 
         try:
             ps = Popen(args, stdout=PIPE, stderr=PIPE)
