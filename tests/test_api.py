@@ -1,7 +1,7 @@
 import random
 import unittest
 
-from pyenv_api import PyenvAPI
+from pyenvapi import PyenvAPI
 
 
 class TestBase(unittest.TestCase):
