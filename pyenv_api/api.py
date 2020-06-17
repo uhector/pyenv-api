@@ -167,7 +167,7 @@ class PyenvAPI:
                       installed already.
         """
         
-        args = ['install', version]
+        args = ['pyenv', 'install', version]
 
         if verbose == True:
             args.append('--verbose')
