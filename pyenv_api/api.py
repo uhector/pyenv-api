@@ -62,7 +62,8 @@ class PyenvAPI:
         assert isinstance(args, list) 
 
         for arg in args:
-            if arg not in self.commands:
+            if (arg not in self.commands and
+                arg not in self.installed_versions):
                 raise PyenvError(f"Invalid command `{arg}'")
 
         args.insert(0, 'pyenv')
