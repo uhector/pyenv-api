@@ -146,6 +146,8 @@ class PyenvAPI:
 
         args = ['global']
         args.extend(versions)
+        
+        self._execute(args)
 
     @global_version.deleter
     def global_version(self):
