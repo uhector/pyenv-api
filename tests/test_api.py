@@ -27,31 +27,32 @@ class InstallationTestCase(TestBase):
         if self.installed_version != None:
             version = self.installed_version
         else:
-            version = random.choice(self.api_object.installed_versions)
+            version = random.choice(self.api_object.installed)
         
         ps = self.api_object.uninstall(version)
         returncode, stdour, stderr = ps
 
         self.assertEqual(returncode, 0)
-        self.assertNotIn(version, self.api_object.installed_versions)
+        self.assertNotIn(version, self.api_object.installed)
 
 
 class GlobalTestCase(TestBase):
     """Test case for `global_version` setter and deleter."""
 
     def test_global_setter(self):
-        version = [random.choice(self.api_object.installed_versions)]
+        version = [random.choice(self.api_object.installed)]
         self.api_object.global_version = version
         
         self.assertEqual(self.api_object.global_version, version)
 
     def test_global_deleter(self):
-        version = [random.choice(self.api_object.installed_versions)]
+        version = [random.choice(self.api_object.installed)]
         self.api_object.global_version = version
         
         del self.api_object.global_version
         
         self.assertNotEqual(self.api_object.global_version, version)
+
 
 if __name__ == '__main__':
     unittest.main()

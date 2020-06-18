@@ -48,10 +48,10 @@ class PyenvAPI:
 
     def __init__(self):
         #: Pyenv root directory path.
-        self._root_dir = self._get_root_dir()
+        self._root = self._get_root_dir()
 
         #: Directory path where all Python versions are installed.
-        self._versions_dir = os.path.join(self._root_dir, 'versions')
+        self._versions_dir = os.path.join(self._root, 'versions')
 
     def _execute(self, args) -> tuple:
         """Executes all synchronous subprocess calls.
@@ -63,7 +63,7 @@ class PyenvAPI:
 
         for arg in args:
             if (arg not in self.commands and
-                arg not in self.installed_versions):
+                arg not in self.installed):
                 raise PyenvError(f"Invalid command `{arg}'")
 
         args.insert(0, 'pyenv')
@@ -86,7 +86,7 @@ class PyenvAPI:
         return stdout.strip()
 
     @property
-    def installed_versions(self) -> list:
+    def installed(self) -> list:
         """Returns a list of all installed versions."""
         
         versions = []
@@ -101,7 +101,7 @@ class PyenvAPI:
         return versions
 
     @property
-    def available_versions(self) -> list:
+    def available(self) -> list:
         """Returns a list of all available Python versions to install."""
 
         args = ['install', '--list']
@@ -142,7 +142,7 @@ class PyenvAPI:
         assert isinstance(versions, (tuple, list))
 
         for version in versions:
-            if version not in self.installed_versions:
+            if version not in self.installed:
                 raise PyenvError(f"version `{version}' not installed")
 
         args = ['global']
@@ -153,7 +153,7 @@ class PyenvAPI:
     def global_version(self):
         """Overwrites '.pyenv/version' file."""
 
-        with open(os.path.join(self._root_dir, 'version'), 'w') as file:
+        with open(os.path.join(self._root, 'version'), 'w') as file:
             pass # Nothing here...
 
     def install(self, version, verbose=False, force=False) -> object:
@@ -172,19 +172,19 @@ class PyenvAPI:
         if verbose == True:
             args.append('--verbose')
 
-        if version in self.installed_versions:
+        if version in self.installed:
             if force == True:
                 args.append('--force')
             else:
                 raise PyenvError(f"`{self._versions_dir}/{version}' already exists")
         else:
-            if version not in self.available_versions:
+            if version not in self.available:
                 raise PythonBuildError(f"`{version}' is not a valid version")
 
         return Popen(args, stdout=PIPE, stderr=PIPE)
 
     def uninstall(self, version):
-        if version not in self.installed_versions:
+        if version not in self.installed:
             raise PyenvError(f"version `{version}' not installed")
 
         args = ['uninstall', '--force', version]
