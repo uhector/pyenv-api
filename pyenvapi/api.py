@@ -47,9 +47,9 @@ class PyenvAPI:
 
     def __init__(self):
         #: Pyenv root directory path.
-        self._root_path = self._get_root_path()
+        self._root = self._get_root_path()
         #: Directory path where all Python versions are installed.
-        self._versions_path = os.path.join(self._root_path, 'versions')
+        self._versions_path = os.path.join(self._root, 'versions')
 
     def _execute(self, args) -> tuple:
         """Executes all synchronous subprocess calls.
@@ -155,7 +155,7 @@ class PyenvAPI:
     def global_version(self):
         """Overwrites '.pyenv/version' file."""
 
-        with open(os.path.join(self._root_path, 'version'), 'w') as file:
+        with open(os.path.join(self._root, 'version'), 'w') as file:
             pass # Nothing here...
 
     def install(self, version, verbose=False, force=False) -> Popen:
