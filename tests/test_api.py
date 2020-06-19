@@ -39,14 +39,19 @@ class InstallationTestCase(TestBase):
 class GlobalTestCase(TestBase):
     """Test case for `global_version` setter and deleter."""
 
-    def test_global_setter(self):
+    @property
+    def random_installed(self):
         version = [random.choice(self.api_object.installed)]
+        return tuple(version)
+
+    def test_global_setter(self):
+        version = self.random_installed
         self.api_object.global_version = version
         
         self.assertEqual(self.api_object.global_version, version)
 
     def test_global_deleter(self):
-        version = [random.choice(self.api_object.installed)]
+        version = self.random_installed
         self.api_object.global_version = version
         
         del self.api_object.global_version
