@@ -84,6 +84,10 @@ class PyenvAPI:
         return stdout.strip()
 
     @property
+    def root(self):
+        return self._root
+
+    @property
     def installed(self) -> tuple:
         """Returns a tuple of all installed versions."""
         
