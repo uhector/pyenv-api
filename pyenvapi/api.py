@@ -1,6 +1,6 @@
 import os
 from subprocess import Popen, PIPE
-from subprocess import CalledProcessError # Exception
+from subprocess import CalledProcessError
 
 from .exceptions import (
     NotInstalledError,
@@ -14,7 +14,7 @@ class PyenvAPI:
     with pyenv through subprocess module.
     """
 
-    commands = [
+    commands = (
         # Subcommands
         'global',
         'install',
@@ -24,8 +24,8 @@ class PyenvAPI:
         # Options
         '--force',
         '--list',
-        '--verbose'
-    ]
+        '--verbose',
+    )
 
     def __new__(cls):
         """Check if pyenv is installed before return an object."""
@@ -40,7 +40,6 @@ class PyenvAPI:
 
             if returncode != 0:
                 raise CalledProcessError(returncode, ' '.join(args), (stdout, stderr))
-
         except FileNotFoundError:
             raise NotInstalledError('pyenv not installed on your system') from None
         else:
@@ -86,8 +85,8 @@ class PyenvAPI:
         return stdout.strip()
 
     @property
-    def installed(self) -> list:
-        """Returns a list of all installed versions."""
+    def installed(self) -> tuple:
+        """Returns a tuple of all installed versions."""
         
         versions = []
         
@@ -98,11 +97,11 @@ class PyenvAPI:
             if not os.path.islink(full_path):
                 versions.append(directory)
 
-        return versions
+        return tuple(versions)
 
     @property
-    def available(self) -> list:
-        """Returns a list of all available Python versions to install."""
+    def available(self) -> tuple:
+        """Returns a tuple of all available Python versions to install."""
 
         args = ['install', '--list']
         ps = self._execute(args)
@@ -112,16 +111,18 @@ class PyenvAPI:
         
         # Positions 0 and 1 in stdout after apply split() are
         # 'Available' and 'versions:' strings.
-        return stdout.split()[2:]
+        available_versions = stdout.split()[2:]
+
+        return tuple(available_versions)
 
     @property
-    def global_version(self) -> list:
-        """Returns a list of the currently active Python versions.
+    def global_version(self) -> tuple:
+        """Returns a tuple of the currently active Python versions.
         
         They are return in order of priority.
         
         If there is only one Python version set as global version,
-        the returned list will contain a single element.
+        the returned tuple will contain a single element.
         """
 
         args = ['global']
@@ -129,14 +130,16 @@ class PyenvAPI:
 
         returncode, stdout, stderr = ps
         stdout = stdout.decode()
-        
-        return stdout.split()
+
+        global_versions = stdout.split()
+
+        return tuple(global_versions)
 
     @global_version.setter
     def global_version(self, versions):
-        """Sets a list of Python versions as global.
+        """Sets a tuple/list of Python versions as global.
 
-        :param versions: a tuple or list of one or multiple Python versions.
+        :param versions: tuple/list of one or multiple Python versions.
         """
 
         assert isinstance(versions, (tuple, list))
@@ -156,15 +159,14 @@ class PyenvAPI:
         with open(os.path.join(self._root, 'version'), 'w') as file:
             pass # Nothing here...
 
-    def install(self, version, verbose=False, force=False) -> object:
-        """Start a Python version intallation in a new process.
-
-        return a subprocess.Popen object.
+    def install(self, version, verbose=False, force=False) -> Popen:
+        """Starts a Python version intallation in a new process.
         
         :param versions: a string of a valid Python version.
         :param verbose: print compilation status to stdout.
         :param force: install even if the version appears to be
                       installed already.
+        :return: subprocess.Popen object.
         """
         
         args = ['pyenv', 'install', version]
@@ -183,7 +185,7 @@ class PyenvAPI:
 
         return Popen(args, stdout=PIPE, stderr=PIPE)
 
-    def uninstall(self, version):
+    def uninstall(self, version) -> tuple:
         if version not in self.installed:
             raise PyenvError(f"version `{version}' not installed")
 
