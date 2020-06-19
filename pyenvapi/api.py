@@ -47,10 +47,9 @@ class PyenvAPI:
 
     def __init__(self):
         #: Pyenv root directory path.
-        self._root = self._get_root_dir()
-
+        self._root_path = self._get_root_path()
         #: Directory path where all Python versions are installed.
-        self._versions_dir = os.path.join(self._root, 'versions')
+        self._versions_path = os.path.join(self._root_path, 'versions')
 
     def _execute(self, args) -> tuple:
         """Executes all synchronous subprocess calls.
@@ -73,7 +72,7 @@ class PyenvAPI:
 
         return returncode, stdout, stderr
 
-    def _get_root_dir(self) -> str:
+    def _get_root_path(self) -> str:
         """Returns the pyenv root directory path."""
 
         args = ['root']
@@ -90,9 +89,9 @@ class PyenvAPI:
         
         versions = []
         
-        for directory in os.listdir(self._versions_dir):
+        for directory in os.listdir(self._versions_path):
             
-            full_path = os.path.join(self._versions_dir, directory)
+            full_path = os.path.join(self._versions_path, directory)
             
             if not os.path.islink(full_path):
                 versions.append(directory)
@@ -156,7 +155,7 @@ class PyenvAPI:
     def global_version(self):
         """Overwrites '.pyenv/version' file."""
 
-        with open(os.path.join(self._root, 'version'), 'w') as file:
+        with open(os.path.join(self._root_path, 'version'), 'w') as file:
             pass # Nothing here...
 
     def install(self, version, verbose=False, force=False) -> Popen:
@@ -178,7 +177,7 @@ class PyenvAPI:
             if force == True:
                 args.append('--force')
             else:
-                raise PyenvError(f"`{self._versions_dir}/{version}' already exists")
+                raise PyenvError(f"`{self._versions_path}/{version}' already exists")
         else:
             if version not in self.available:
                 raise PythonBuildError(f"`{version}' is not a valid version")
