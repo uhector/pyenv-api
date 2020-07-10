@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
-- Now `PyenvAPI` `installed`, `available`, `uninstall` methods and his `global_version` property getter returns tuples instead lists.
+- Now `PyenvAPI` `installed`, `available`, `uninstall` methods and its `global_version` property getter returns tuples instead lists.
 
 ## [1.0.0] - 2020-06-18
  
