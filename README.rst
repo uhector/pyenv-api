@@ -118,3 +118,8 @@ Once you have a ``PyenvAPI`` object, you can perform operations on it.
     # `returncode` - Exit status of the child process
     # `stdout` - A bytes sequence of the captured stdout
     # `stderr` - A bytes sequence of the captured stderr
+
+TODO
+------------
+* Add support for pyenv-win
+* ...
