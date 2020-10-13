@@ -121,5 +121,15 @@ Once you have a ``PyenvAPI`` object, you can perform operations on it.
 
 TODO
 ------------
-* Add support for pyenv-win
+* |ss| Add support for `pyenv-win`_ |se| (Unreleased) 
 * ...
+
+.. _pyenv-win: https://github.com/pyenv-win/pyenv-win
+
+.. |ss| raw:: html
+
+   <strike>
+
+.. |se| raw:: html
+
+   </strike>
