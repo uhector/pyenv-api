@@ -1,11 +1,13 @@
 import os
+import platform
+
 from subprocess import Popen, PIPE
 from subprocess import CalledProcessError
 
 from .exceptions import (
     NotInstalledError,
     PyenvError,
-    PythonBuildError
+    PythonBuildError,
 )
 
 
@@ -14,7 +16,12 @@ class PyenvAPI:
     with pyenv through subprocess module.
     """
 
-    commands = (
+    if platform.system() == 'Windows':
+        _PYENV_WIN = True
+    else:
+        _PYENV_WIN = False
+
+    _COMMANDS = (
         # Subcommands
         'global',
         'install',
@@ -28,12 +35,15 @@ class PyenvAPI:
     )
 
     def __new__(cls):
-        """Check if pyenv is installed before return an object."""
+        """Checks if pyenv is installed before return an object."""
 
         args = ['pyenv', 'root']
 
         try:
-            ps = Popen(args, stdout=PIPE, stderr=PIPE)
+            if cls._PYENV_WIN:
+                ps = Popen(args[0], stdout=PIPE, stderr=PIPE, shell=True)
+            else:
+                ps = Popen(args, stdout=PIPE, stderr=PIPE)
 
             stdout, stderr = ps.communicate()
             returncode = ps.returncode
@@ -51,7 +61,7 @@ class PyenvAPI:
         #: Directory path where all Python versions are installed.
         self._versions_path = os.path.join(self._root, 'versions')
 
-    def _execute(self, args) -> tuple:
+    def _execute(self, args):
         """Executes all synchronous subprocess calls.
         
         :param args: list of subcommands and options.
@@ -60,35 +70,42 @@ class PyenvAPI:
         assert isinstance(args, list) 
 
         for arg in args:
-            if (arg not in self.commands and
+            if (arg not in self._COMMANDS and
                 arg not in self.installed):
                 raise PyenvError(f"Invalid command `{arg}'")
 
         args.insert(0, 'pyenv')
-        ps = Popen(args, stdout=PIPE, stderr=PIPE)
+        
+        if self._PYENV_WIN:
+            ps = Popen(args, stdout=PIPE, stderr=PIPE, shell=True)
+        else:
+            ps = Popen(args, stdout=PIPE, stderr=PIPE)
         
         stdout, stderr = ps.communicate()
         returncode = ps.returncode
 
         return returncode, stdout, stderr
 
-    def _get_root_path(self) -> str:
+    def _get_root_path(self):
         """Returns the pyenv root directory path."""
 
-        args = ['root']
-        ps = self._execute(args)
-        
-        returncode, stdout, stderr = ps
-        stdout = stdout.decode()
+        if self._PYENV_WIN:
+            return os.getenv('PYENV')
+        else:
+            args = ['root']
+            ps = self._execute(args)
+            
+            returncode, stdout, stderr = ps
+            stdout = stdout.decode()
 
-        return stdout.strip()
+            return stdout.strip()
 
     @property
     def root(self):
         return self._root
 
     @property
-    def installed(self) -> tuple:
+    def installed(self):
         """Returns a tuple of all installed versions."""
         
         versions = []
@@ -103,7 +120,7 @@ class PyenvAPI:
         return tuple(versions)
 
     @property
-    def available(self) -> tuple:
+    def available(self):
         """Returns a tuple of all available Python versions to install."""
 
         args = ['install', '--list']
@@ -112,14 +129,18 @@ class PyenvAPI:
         returncode, stdout, stderr = ps
         stdout = stdout.decode()
         
-        # Positions 0 and 1 in stdout after apply split() are
-        # 'Available' and 'versions:' strings.
-        available_versions = stdout.split()[2:]
+        # For pyenv-win:
+        if self._PYENV_WIN:
+            available_versions = stdout.split()[5:]
+        else:
+            # Positions 0 and 1 in stdout after apply split() are
+            # 'Available' and 'versions:' strings.
+            available_versions = stdout.split()[2:]
 
         return tuple(available_versions)
 
     @property
-    def global_version(self) -> tuple:
+    def global_version(self):
         """Returns a tuple of the currently active Python versions.
         
         They are return in order of priority.
@@ -135,6 +156,9 @@ class PyenvAPI:
         stdout = stdout.decode()
 
         global_versions = stdout.split()
+
+        if ' '.join(global_versions) == 'no global version configured':
+            global_versions = ['system']
 
         return tuple(global_versions)
 
@@ -162,7 +186,7 @@ class PyenvAPI:
         with open(os.path.join(self._root, 'version'), 'w') as file:
             pass # Nothing here...
 
-    def install(self, version, verbose=False, force=False) -> Popen:
+    def install(self, version, verbose=False, force=False):
         """Starts a Python version intallation in a new process.
         
         :param versions: a string of a valid Python version.
@@ -174,7 +198,7 @@ class PyenvAPI:
         
         args = ['pyenv', 'install', version]
 
-        if verbose == True:
+        if verbose == True and self._PYENV_WIN == False:
             args.append('--verbose')
 
         if version in self.installed:
@@ -186,9 +210,12 @@ class PyenvAPI:
             if version not in self.available:
                 raise PythonBuildError(f"`{version}' is not a valid version")
 
-        return Popen(args, stdout=PIPE, stderr=PIPE)
+        if self._PYENV_WIN:
+            return Popen(args, stdout=PIPE, stderr=PIPE, shell=True)
+        else:
+            return Popen(args, stdout=PIPE, stderr=PIPE)
 
-    def uninstall(self, version) -> tuple:
+    def uninstall(self, version):
         if version not in self.installed:
             raise PyenvError(f"version `{version}' not installed")
 
